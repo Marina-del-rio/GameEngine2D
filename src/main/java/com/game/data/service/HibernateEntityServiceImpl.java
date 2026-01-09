@@ -1,14 +1,19 @@
 package com.game.data.service;
 
+import com.game.data.dto.EntityCreateDto;
+import com.game.data.dto.EntityQueryDto;
+import com.game.data.dto.EntityUpdateDto;
 import com.game.data.entity.*;
-import com.game.data.dto.*;
+import com.game.data.factory.EntityFactory;
 import com.game.data.repository.EntityDataRepository;
-import jakarta.persistence.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,6 +28,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
 
     @Autowired
     private EntityDataRepository entityDataRepository;
+
+    @Autowired
+    private EntityFactory entityFactory; // <-- Inyectamos la nueva fábrica única
 
     // ========== CE3.a: Configuración y Conexión ORM ==========
 
@@ -45,14 +53,18 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     // ========== CE3.d, CE3.e: Operaciones CRUD ==========
 
     /**
-     *  INSERT con persist()
+     * INSERT con persist() usando la fábrica única.
+     * El método delega la creación de la instancia específica a la fábrica,
+     * y luego se encarga de las propiedades comunes y la persistencia.
      */
     @Override
     @Transactional
     public EntityData createEntity(EntityCreateDto dto) {
-        EntityData entity = createEntityByType(dto);
+        // 1. Usar la fábrica para crear la instancia de la subclase correcta (CharacterData, EnemyData, etc.).
+        //    La fábrica se encarga de toda la lógica de instanciación y de setear las propiedades específicas.
+        EntityData entity = entityFactory.create(dto);
 
-        // Campos comunes
+        // 2. Establecer las propiedades comunes que toda EntityData tiene.
         entity.setName(dto.getName());
         entity.setPosX(dto.getPosX() != null ? dto.getPosX() : 0.0);
         entity.setPosY(dto.getPosY() != null ? dto.getPosY() : 0.0);
@@ -62,107 +74,20 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         entity.setActive(true);
         entity.setVisible(true);
 
-        // Asociar con escena
+        // 3. Asociar con escena y proyecto (si se proporcionan los IDs).
         if (dto.getSceneId() != null) {
             SceneData scene = entityManager.find(SceneData.class, dto.getSceneId());
             entity.setScene(scene);
         }
 
-        // Asociar con proyecto
         if (dto.getProjectId() != null) {
             ProjectData project = entityManager.find(ProjectData.class, dto.getProjectId());
             entity.setProject(project);
         }
 
+        // 4. Persistir la entidad. Hibernate generará el INSERT apropiado.
         entityManager.persist(entity);
         return entity;
-    }
-
-    /**
-     * Crea la entidad del tipo correcto según el DTO
-     */
-    private EntityData createEntityByType(EntityCreateDto dto) {
-        String type = dto.getEntityType().toUpperCase();
-
-        switch (type) {
-            case "CHARACTER":
-                CharacterData character = new CharacterData();
-                if (dto.getHealth() != null) character.setHealth(dto.getHealth());
-                if (dto.getSpeed() != null) character.setSpeed(dto.getSpeed());
-                if (dto.getIsMainCharacter() != null) character.setIsMainCharacter(dto.getIsMainCharacter());
-                if (dto.getLives() != null) character.setLives(dto.getLives());
-                return character;
-
-            case "ENEMY":
-                EnemyData enemy = new EnemyData();
-                if (dto.getHealth() != null) enemy.setHealth(dto.getHealth());
-                if (dto.getSpeed() != null) enemy.setSpeed(dto.getSpeed());
-                if (dto.getDamage() != null) enemy.setDamage(dto.getDamage());
-                if (dto.getEnemyType() != null) {
-                    enemy.setEnemyType(EnemyData.EnemyType.valueOf(dto.getEnemyType()));
-                }
-                if (dto.getAiBehavior() != null) {
-                    enemy.setAiBehavior(EnemyData.EnemyBehavior.valueOf(dto.getAiBehavior()));
-                }
-                return enemy;
-
-            case "NPC":
-                NPCData npc = new NPCData();
-                if (dto.getHealth() != null) npc.setHealth(dto.getHealth());
-                if (dto.getSpeed() != null) npc.setSpeed(dto.getSpeed());
-                if (dto.getNpcType() != null) {
-                    npc.setNpcType(NPCData.NPCType.valueOf(dto.getNpcType()));
-                }
-                if (dto.getDialogueData() != null) npc.setDialogueData(dto.getDialogueData());
-                return npc;
-
-            case "STATIC_OBJECT":
-                StaticObjectData staticObj = new StaticObjectData();
-                if (dto.getSolid() != null) staticObj.setSolid(dto.getSolid());
-                if (dto.getStaticType() != null) {
-                    staticObj.setStaticType(StaticObjectData.StaticType.valueOf(dto.getStaticType()));
-                }
-                return staticObj;
-
-            case "DYNAMIC_OBJECT":
-                DynamicObjectData dynamicObj = new DynamicObjectData();
-                if (dto.getHasPhysics() != null) dynamicObj.setHasPhysics(dto.getHasPhysics());
-                if (dto.getDynamicType() != null) {
-                    dynamicObj.setDynamicType(DynamicObjectData.DynamicType.valueOf(dto.getDynamicType()));
-                }
-                return dynamicObj;
-
-            case "AUDIO":
-                AudioData audio = new AudioData();
-                if (dto.getAudioPath() != null) audio.setAudioPath(dto.getAudioPath());
-                if (dto.getVolume() != null) audio.setVolume(dto.getVolume());
-                if (dto.getLoop() != null) audio.setLoop(dto.getLoop());
-                if (dto.getAudioType() != null) {
-                    audio.setAudioType(AudioData.AudioType.valueOf(dto.getAudioType()));
-                }
-                return audio;
-
-            case "UI_ELEMENT":
-                UIElementData ui = new UIElementData();
-                if (dto.getText() != null) ui.setText(dto.getText());
-                if (dto.getWidth() != null) ui.setWidth(dto.getWidth());
-                if (dto.getHeight() != null) ui.setHeight(dto.getHeight());
-                if (dto.getUiType() != null) {
-                    ui.setUiType(UIElementData.UIType.valueOf(dto.getUiType()));
-                }
-                return ui;
-
-            case "TILE":
-                TileData tile = new TileData();
-                if (dto.getGridX() != null) tile.setGridX(dto.getGridX());
-                if (dto.getGridY() != null) tile.setGridY(dto.getGridY());
-                if (dto.getTilesetPath() != null) tile.setTilesetPath(dto.getTilesetPath());
-                if (dto.getWalkable() != null) tile.setWalkable(dto.getWalkable());
-                return tile;
-
-            default:
-                return new EntityData();
-        }
     }
 
     /**
