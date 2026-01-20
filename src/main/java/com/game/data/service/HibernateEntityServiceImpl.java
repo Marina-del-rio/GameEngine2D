@@ -37,6 +37,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  Prueba EntityManager
      */
+
+    // Verifica el que el EntityManager esté activo y conectado a la base de datos (usando una query sencilla para confirmarlo) //
+
     @Override
     public String testEntityManager() {
         if (!entityManager.isOpen()) {
@@ -57,14 +60,19 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
      * El método delega la creación de la instancia específica a la fábrica,
      * y luego se encarga de las propiedades comunes y la persistencia.
      */
+
+    // Este método crea una entidad especifica en la base de datos. //
+
     @Override
     @Transactional
     public EntityData createEntity(EntityCreateDto dto) {
         // 1. Usar la fábrica para crear la instancia de la subclase correcta (CharacterData, EnemyData, etc.).
         //    La fábrica se encarga de toda la lógica de instanciación y de setear las propiedades específicas.
+        // Creamos la entidad //
         EntityData entity = entityFactory.create(dto);
 
         // 2. Establecer las propiedades comunes que toda EntityData tiene.
+        // (Agregamos el contenido a la entidad creada) //
         entity.setName(dto.getName());
         entity.setPosX(dto.getPosX() != null ? dto.getPosX() : 0.0);
         entity.setPosY(dto.getPosY() != null ? dto.getPosY() : 0.0);
@@ -75,6 +83,7 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         entity.setVisible(true);
 
         // 3. Asociar con escena y proyecto (si se proporcionan los IDs).
+        //  (Si el ID de la escena o el ID del proyecto no es nulo, le asociamos con una escena o con un proyecto) //
         if (dto.getSceneId() != null) {
             SceneData scene = entityManager.find(SceneData.class, dto.getSceneId());
             entity.setScene(scene);
@@ -86,6 +95,7 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         }
 
         // 4. Persistir la entidad. Hibernate generará el INSERT apropiado.
+        // (Guardamos la entidad) //
         entityManager.persist(entity);
         return entity;
     }
@@ -93,6 +103,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      * SELECT por ID con find()
      */
+
+    // Busca una entidad y la devuelve mediante el ID [Búsqueda directa con el find()] //
+
     @Override
     public EntityData findEntityById(Long id) {
         return entityManager.find(EntityData.class, id);
@@ -101,6 +114,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      * UPDATE con merge()
      */
+
+    // Este método actualiza los campos de una entidad que ya existe con los valores nuevos //
+
     @Override
     @Transactional
     public EntityData updateEntity(Long id, EntityUpdateDto dto) {
@@ -122,7 +138,7 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         if (dto.getLayer() != null) existing.setLayer(dto.getLayer());
         if (dto.getTags() != null) existing.setTags(dto.getTags());
 
-        // Si es un Actor, actualizar campos específicos
+        // Sí es un Actor, actualizar campos específicos
         if (existing instanceof ActorData) {
             ActorData actor = (ActorData) existing;
             if (dto.getHealth() != null) actor.setHealth(dto.getHealth());
@@ -135,6 +151,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  DELETE con remove()
      */
+
+    // Esté método elimina la entidad por su ID //
+
     @Override
     @Transactional
     public boolean deleteEntity(Long id) {
@@ -149,6 +168,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  SELECT all con Repository
      */
+
+    // Esté método recupera todas las entidades de la base de datos //
+
     @Override
     public List<EntityData> findAll() {
         return entityDataRepository.findAll();
@@ -159,6 +181,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  JPQL básico - Buscar por escena
      */
+
+    // Esté método busca las entidades activas por escena y las ordena por el layer y el nombre //
+
     @Override
     public List<EntityData> findEntitiesByScene(Long sceneId) {
         String jpql = "SELECT e FROM EntityData e WHERE e.scene.id = :sceneId AND e.active = true ORDER BY e.layer, e.name";
@@ -172,6 +197,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  JPQL dinámico - Búsqueda con filtros
      */
+
+    // Esté método hace búsquedas dinámicas con varios filtros, mediante van pasando los filtros se va construyendo la consulta //
+
     @Override
     public List<EntityData> searchEntities(EntityQueryDto queryDto) {
         StringBuilder jpql = new StringBuilder("SELECT e FROM EntityData e WHERE 1=1");
@@ -220,6 +248,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  Transacción múltiple
      */
+
+    // Esté método permite
+
     @Override
     @Transactional
     public boolean transferData(List<EntityData> entities) {
@@ -234,6 +265,9 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
     /**
      *  COUNT con JPQL
      */
+
+    // Cuenta la cantidad de entidades activas que existen en una escena específica, las busca sin cargarla las entidades en memoria //
+
     @Override
     public long executeCountByScene(Long sceneId) {
         String jpql = "SELECT COUNT(e) FROM EntityData e WHERE e.scene.id = :sceneId AND e.active = true";
