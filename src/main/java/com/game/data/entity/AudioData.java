@@ -5,9 +5,16 @@ import jakarta.persistence.*;
 /**
  * Recurso de audio
  */
+//DEFINEN ------------------------------------------------------
+
+// @Entity:  Indicador para Hibernate, indica que es una Entidad de Hibernate.
+// @DiscriminatorValue: Se encarga de dar valor a la columna que el valor de esta fila va a ser "AUDIO"
 @Entity
 @DiscriminatorValue("AUDIO")
 public class AudioData extends EntityData {
+
+// PROPIEDADES -----------------------------------
+// @Enumerated: Indica a Hibernate, que el campo "Audiotype" sea "STRING", ya que hay más de un tipo de audio (música, efectos...)
 
     @Enumerated(EnumType.STRING)
     private AudioType audioType = AudioType.SFX;

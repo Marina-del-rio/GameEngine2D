@@ -7,11 +7,28 @@ import java.time.LocalDateTime;
  * Entidad base para TODAS las entidades del juego en BD
  * Equivalente a tu Entity.java del motor
  */
+
+// DEFINEN --------------------
+
+// @Entity:  Indicador para Hibernate, indica que es una Entidad de Hibernate.
+// @Table: Indica a Hibernate que "EntityData" se mapea en la tabla "entities"
+// @Inheritance: Indica a Hibernate que "entities" es una única tabla por lo que toda clase
+// que herede de "EntityData" se guardan en la tabla "entities"
+// @DiscriminatorColumn: Hibernate necesita tener una subclase, por lo que esta anotación diferencia las clases que heredan
+// de "EntityData" con el identificador ("dtype")
+
 @Entity
 @Table(name = "entities")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 public class EntityData {
+
+// PROPIEDADES ---------------------
+// @Id: PK (Clave Primaria)
+// @GenerateValue: Indica a Hibernate que "ID" es una columna auto-incremental
+// @Column: se usa en el campo name porque esta no puede ser nula, en el resto no se indica, ya que cada campo se mapea de manera automática
+// @ManyToOne: Define la relación [.LAZY: hace que los datos de la base relación no se carguen (optimización/rendimiento)]
+// @JoinColumn: FK [Clave Foreanea]
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,6 +73,10 @@ public class EntityData {
     // Timestamps
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+ // CICLO DE VIDA ------------------------------------------
+ // @PrePersist: (creación) Se ejecuta antes que una nueva entidad se guarde en la BD por primera vez para establecer la fecha de creación.
+ // @PreUpdatae: (ya creada)Se ejecuta antes para poder actualizar la fecha.
 
     @PrePersist
     protected void onCreate() {
