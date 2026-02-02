@@ -194,18 +194,13 @@ class HibernateEntityServiceTest {
         assertEquals(10, ((TileData) resultado).getGridY());
     }
 
-    // ========== TESTS DE LECTURA (READ) ==========
+
 
     @Test
     @DisplayName("findEntityById() - Debe encontrar una entidad que sí existe")
     void findEntityById_Existe_DebeRetornar() {
-        // Arrange: Se crea una entidad primero para asegurarnos de que existe en la BD.
         EntityData creada = crearEntidad("CHARACTER", "Test");
-
-        // Act: Se busca la entidad usando el ID que nos devolvió la creación.
         EntityData encontrada = entityService.findEntityById(creada.getId());
-
-        // Assert: Se verifica que la entidad encontrada no es nula y tiene el nombre correcto.
         assertNotNull(encontrada, "Se debería haber encontrado la entidad.");
         assertEquals("Test", encontrada.getName(), "El nombre de la entidad encontrada debe ser correcto.");
     }
@@ -213,38 +208,27 @@ class HibernateEntityServiceTest {
     @Test
     @DisplayName("findEntityById() - Debe devolver null si la entidad no existe")
     void findEntityById_NoExiste_DebeRetornarNull() {
-        // Arrange: No se crea nada. Se usa un ID que es muy improbable que exista.
-
-        // Act: Se busca una entidad con un ID заведомо inexistente.
         EntityData resultado = entityService.findEntityById(99999L);
-
-        // Assert: Se comprueba que el resultado es nulo.
         assertNull(resultado, "No se debería encontrar una entidad, el resultado debe ser null.");
     }
 
     @Test
     @DisplayName("findAll() - Debe devolver una lista con todas las entidades creadas")
     void findAll_DebeRetornarTodas() {
-        // Arrange: Se crean varias entidades de distintos tipos para poblar la BD.
+
         crearEntidad("CHARACTER", "Char 1");
         crearEntidad("ENEMY", "Enemy 1");
         crearEntidad("NPC", "NPC 1");
 
-        // Act: Se llama a `findAll()` para obtener todas las entidades.
         List<EntityData> todas = entityService.findAll();
 
-        // Assert: Se comprueba que la lista contiene al menos las 3 entidades que creamos.
-        // No se pone `assertEquals(3, ...)` porque la BD de test podría tener ya otros datos
-        // si no se usara @Transactional. Con @Transactional, siempre partimos de 0.
         assertTrue(todas.size() >= 3, "La lista debe contener al menos las 3 entidades creadas.");
     }
 
-    // ========== TESTS DE ACTUALIZACIÓN (UPDATE) ==========
 
     @Test
     @DisplayName("updateEntity() - Debe actualizar los campos de una entidad existente")
     void updateEntity_DebeActualizar() {
-        // Arrange: Se crea una entidad inicial y un DTO con los nuevos datos.
         EntityData creada = crearEntidad("CHARACTER", "Original");
 
         EntityUpdateDto updateDto = new EntityUpdateDto();
@@ -252,10 +236,8 @@ class HibernateEntityServiceTest {
         updateDto.setPosX(100.0);
         updateDto.setActive(false);
 
-        // Act: Se llama al método de actualización.
         EntityData actualizada = entityService.updateEntity(creada.getId(), updateDto);
 
-        // Assert: Se comprueba que los campos de la entidad devuelta tienen los valores nuevos.
         assertEquals("Actualizado", actualizada.getName());
         assertEquals(100.0, actualizada.getPosX());
         assertFalse(actualizada.getActive());
@@ -264,13 +246,9 @@ class HibernateEntityServiceTest {
     @Test
     @DisplayName("updateEntity() - Debe lanzar una excepción si la entidad no existe")
     void updateEntity_NoExiste_DebeLanzarExcepcion() {
-        // Arrange: Se crea un DTO de actualización pero no se crea la entidad.
         EntityUpdateDto dto = new EntityUpdateDto();
         dto.setName("Test");
 
-        // Act & Assert: Se usa `assertThrows` para verificar que el código dentro de la lambda
-        // lanza una excepción del tipo esperado (RuntimeException). Esto es útil para probar
-        // el manejo de errores.
         assertThrows(RuntimeException.class, () -> {
             entityService.updateEntity(99999L, dto);
         }, "Debería lanzarse una RuntimeException al intentar actualizar una entidad que no existe.");

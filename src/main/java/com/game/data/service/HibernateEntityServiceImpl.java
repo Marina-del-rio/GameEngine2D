@@ -66,22 +66,13 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
                 result[1], result[0]);
     }
 
-    // ========== APARTADO: Operaciones CRUD (Crear, Leer, Actualizar, Borrar) ==========
 
-    /**
-     * Crea una nueva entidad en la base de datos.
-     * @Transactional: Sobrescribe el `readOnly=true` de la clase. Este método SÍ escribe en la BD,
-     * por lo que necesita una transacción de escritura. Spring la gestionará automáticamente.
-     */
     @Override
     @Transactional
     public EntityData createEntity(EntityCreateDto dto) {
-        // 1. Delega la creación de la instancia específica (CharacterData, EnemyData, etc.) a la fábrica.
-        // Esto centraliza la lógica de qué clase crear según el "entityType" del DTO.
+
         EntityData entity = entityFactory.create(dto);
 
-        // 2. Establece las propiedades comunes que toda `EntityData` tiene.
-        // Se usan valores por defecto si el DTO no los proporciona (e.g., 0.0 para posiciones).
         entity.setName(dto.getName());
         entity.setPosX(dto.getPosX() != null ? dto.getPosX() : 0.0);
         entity.setPosY(dto.getPosY() != null ? dto.getPosY() : 0.0);
@@ -91,8 +82,6 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         entity.setActive(true);
         entity.setVisible(true);
 
-        // 3. Gestiona las relaciones. Si el DTO incluye un ID de escena o proyecto,
-        // se busca la entidad correspondiente y se establece la relación.
         if (dto.getSceneId() != null) {
             SceneData scene = entityManager.find(SceneData.class, dto.getSceneId());
             entity.setScene(scene);
@@ -102,36 +91,24 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
             entity.setProject(project);
         }
 
-        // 4. Persiste la entidad. `entityManager.persist()` añade la nueva entidad al contexto
-        // de persistencia. En el `commit` de la transacción, Hibernate generará el `INSERT` SQL.
         entityManager.persist(entity);
         return entity;
     }
 
-    /**
-     * Busca y devuelve una entidad por su clave primaria (ID).
-     * Usa `entityManager.find()`, que es la forma más eficiente de obtener un objeto por su ID.
-     */
     @Override
     public EntityData findEntityById(Long id) {
-        // `find` devuelve el objeto si lo encuentra, o `null` si no existe.
         return entityManager.find(EntityData.class, id);
     }
 
-    /**
-     * Actualiza una entidad existente.
-     * @Transactional: Necesario porque este método modifica datos.
-     */
     @Override
     @Transactional
     public EntityData updateEntity(Long id, EntityUpdateDto dto) {
-        // Primero, se busca la entidad existente.
+
         EntityData existing = findEntityById(id);
         if (existing == null) {
             throw new RuntimeException("No se encontró entidad con ID " + id);
         }
 
-        // Se actualizan solo los campos que vienen en el DTO (los que no vienen son nulos).
         if (dto.getName() != null) existing.setName(dto.getName());
         if (dto.getPosX() != null) existing.setPosX(dto.getPosX());
         if (dto.getPosY() != null) existing.setPosY(dto.getPosY());
@@ -144,16 +121,11 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         if (dto.getLayer() != null) existing.setLayer(dto.getLayer());
         if (dto.getTags() != null) existing.setTags(dto.getTags());
 
-        // Si la entidad es un tipo específico (como ActorData), se actualizan también
-        // sus campos propios.
         if (existing instanceof ActorData) {
             ActorData actor = (ActorData) existing;
             if (dto.getHealth() != null) actor.setHealth(dto.getHealth());
             if (dto.getSpeed() != null) actor.setSpeed(dto.getSpeed());
         }
-
-        // `entityManager.merge()` actualiza la entidad en el contexto de persistencia.
-        // Hibernate detectará los cambios y generará el `UPDATE` SQL correspondiente.
         return entityManager.merge(existing);
     }
 
@@ -175,33 +147,16 @@ public class HibernateEntityServiceImpl implements HibernateEntityService {
         return true;
     }
 
-    /**
-     * Devuelve una lista con todas las entidades de la tabla.
-     * Se delega la operación al repositorio de Spring Data JPA, que nos da este método ya implementado.
-     */
     @Override
     public List<EntityData> findAll() {
         return entityDataRepository.findAll();
     }
 
-    // ========== APARTADO: Consultas JPQL (Lenguaje de Consulta de Persistencia de Jakarta) ==========
-
-    /**
-     * Busca todas las entidades activas que pertenecen a una escena específica.
-     * Usa JPQL, que es similar a SQL pero opera sobre entidades (objetos) en vez de tablas.
-     */
     @Override
     public List<EntityData> findEntitiesByScene(Long sceneId) {
-        // `e` es un alias para `EntityData`. La consulta se parece a SQL:
-        // "Selecciona entidades `e` donde el ID de su escena sea `:sceneId`..."
         String jpql = "SELECT e FROM EntityData e WHERE e.scene.id = :sceneId AND e.active = true ORDER BY e.layer, e.name";
-
-        // Se crea una consulta "tipada" (TypedQuery), lo que significa que sabemos que devolverá objetos EntityData.
         TypedQuery<EntityData> query = entityManager.createQuery(jpql, EntityData.class);
-        // Se asigna un valor al parámetro `:sceneId` de la consulta.
         query.setParameter("sceneId", sceneId);
-
-        // Se ejecuta la consulta y se devuelve la lista de resultados.
         return query.getResultList();
     }
 

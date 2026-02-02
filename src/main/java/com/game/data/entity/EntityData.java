@@ -62,7 +62,9 @@ public class EntityData {
     private String tags;
 
     // Relaciones
+    //Una escena tiene muchas entidades
     @ManyToOne(fetch = FetchType.LAZY)
+    //foreign key
     @JoinColumn(name = "scene_id")
     private SceneData scene;
 

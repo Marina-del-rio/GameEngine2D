@@ -4,13 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8b2409bf-1f7d-419d-a228-e0dd3c54792b" name="Changes" comment="mas comentarios para entrega acceso a datos">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-    </list>
-    <list id="2a4938d2-5504-4c72-997a-260843db3697" name="Changes by jixer" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/game/data/entity/AudioData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/game/data/entity/AudioData.java" afterDir="false" />
+    <list default="true" id="8b2409bf-1f7d-419d-a228-e0dd3c54792b" name="Changes" comment="Explicaciones anotaciones hibernate">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_01_2026_19_48_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/game/data/entity/EntityData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/game/data/entity/EntityData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/game/data/service/HibernateEntityServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/game/data/service/HibernateEntityServiceImpl.java" afterDir="false" />
     </list>
+    <list id="2a4938d2-5504-4c72-997a-260843db3697" name="Changes by jixer" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -76,6 +77,10 @@
       <workItem from="1768909662837" duration="107000" />
       <workItem from="1768934877608" duration="2472000" />
       <workItem from="1768980680326" duration="6659000" />
+      <workItem from="1769015721574" duration="2295000" />
+      <workItem from="1769071481243" duration="2000" />
+      <workItem from="1769416235474" duration="687000" />
+      <workItem from="1770027900140" duration="1032000" />
     </task>
     <task id="LOCAL-00001" summary="mas comentarios para entrega acceso a datos">
       <option name="closed" value="true" />
@@ -85,7 +90,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768937268441</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Explicaciones anotaciones hibernate">
+      <option name="closed" value="true" />
+      <created>1769015818089</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1769015818089</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -93,6 +106,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="mas comentarios para entrega acceso a datos" />
-    <option name="LAST_COMMIT_MESSAGE" value="mas comentarios para entrega acceso a datos" />
+    <MESSAGE value="Explicaciones anotaciones hibernate" />
+    <option name="LAST_COMMIT_MESSAGE" value="Explicaciones anotaciones hibernate" />
   </component>
 </project>

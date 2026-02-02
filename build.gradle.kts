@@ -1,6 +1,6 @@
 plugins {
     java
-    id("application") // <-- AÑADIR ESTA LÍNEA
+    id("application")
     // El plugin de Spring Boot debe estar aquí para gestionar el proyecto
     id("org.springframework.boot") version "3.2.0"
     // Este plugin gestiona las versiones de las dependencias para evitar conflictos
